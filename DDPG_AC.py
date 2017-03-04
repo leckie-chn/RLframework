@@ -36,7 +36,7 @@ def Play_Game():
     replay_buffer = ReplayBuffer(Buffer_Size)
 
     reward_history = np.empty(episode_count)
-    critic_loss_history = np.empty(episode_count / batch_size)
+    critic_loss_history = np.empty(episode_count)
 
     for episode in range(episode_count):
         env = Environment()
@@ -71,7 +71,7 @@ def Play_Game():
             actor.train_target_network()
             critic.train_target_network()
         reward_history[episode] = total_reward
-        cirtic_loss_history[episode] = total_loss
+        critic_loss_history[episode] = total_loss
 
     # save model
     actor.model.save_weights('saved_networks/actor_model.h5')

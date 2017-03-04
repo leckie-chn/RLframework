@@ -17,7 +17,7 @@ class Environment(object):
         self.state = None
 
     def get_state(self):
-        self.flow_in = math.sin(t / (math.pi * 2 * self.T)) * self.totcap * 1.05
+        self.flow_in = math.sin(self.t / (math.pi * 2 * self.T)) * self.totcap * 1.05
         self.t += 1.0
         self.state = np.concatenate(([self.flow_in], self.buffer))
         return self.state
@@ -29,7 +29,7 @@ class Environment(object):
         drop_flow = np.sum(self.buffer - self.bufsize)
         self.buffer = np.minimum(self.buffer, self.bufsize)
         load_factor = cur_flow / self.capacity
-        reward = 2.0 - np.max(load_factor) - math.exp(drop_flow / self.flow_in * 100)
+        reward = 2.0 - np.max(load_factor) - math.exp(0 if self.flow_in == 0 else drop_flow / self.flow_in * 100)
         next_state = self.get_state()
-        isTerminal = 1 if self.t > self.T * 2.5 else 0
+        isTerminal = 1 if self.t > self.T * 5 * math.pi else 0
         return next_state, reward, isTerminal
