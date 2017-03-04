@@ -1,0 +1,6 @@
+*.pyc
+*.png
+._*
+.idea
+*.log
+*.out
