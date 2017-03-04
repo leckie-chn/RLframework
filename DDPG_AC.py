@@ -23,7 +23,7 @@ def Play_Game():
     action_size = 3
     episode_count = 10000
     epsilon = 1.0
-    eps_decay = 0.00001
+    eps_decay = 0.0001
 
     np.random.seed(1234)
 
@@ -53,6 +53,7 @@ def Play_Game():
             next_state, reward, isTerminal = env.take_action(action)
             replay_buffer.add(state, action, reward, next_state, isTerminal)
             state = next_state
+            total_reward += reward
 
             # train models
             batch = replay_buffer.get_batch(Batch_Size)
@@ -62,7 +63,7 @@ def Play_Game():
             new_states = np.asarray([e[3] for e in batch])
             isTerminals = np.asarray([e[4] for e in batch])
 
-            targetQ = critic.target_model.predict([new_states, actor.target_model.predict(new_states)])
+            targetQ = critic.target_model.predict([new_states, actor.target_model.predict(new_states)]).reshape(rewards.shape)
             targetY = rewards + GAMMA * isTerminals * targetQ
             total_loss += critic.model.train_on_batch([states, actions], targetY)
             action_for_grad = actor.model.predict(states)
@@ -87,20 +88,12 @@ def Play_Game():
     plt.close()
 
     plt.title('Critic Loss')
-    plt.plot(np.arange(episode_count / batch_size), np.log10(critic_loss_history), 'o')
+    plt.plot(np.arange(episode_count), np.log10(critic_loss_history), 'o')
     plt.xlabel('Batch Iteration')
     plt.savefig('loss.png')
     plt.close()
 
     # test model behavior
-    test_episode = 100
-    for c in xrange(test_episode):
-        state = env.get_state()
-        print "state ==>", state
-        action = actor.model.predict(np.array(state).reshape(1, state_size))[0]
-        print "action ==>", action
-        reward = env.take_action(action)
-        print "reward ==>", reward
 
 if __name__ == "__main__":
     Play_Game()
