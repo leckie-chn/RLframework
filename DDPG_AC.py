@@ -44,6 +44,7 @@ def Play_Game():
         isTerminal = False
         total_reward = 0.0
         total_loss = 0.0
+        step_count = 0
         while isTerminal is False:
             action = actor.model.predict(state.reshape(1, state_size))[0]
             if epsilon > 0:
@@ -71,8 +72,10 @@ def Play_Game():
             actor.train(states, actor_grads)
             actor.train_target_network()
             critic.train_target_network()
-        reward_history[episode] = total_reward
-        critic_loss_history[episode] = total_loss
+            step_count += 1
+        reward_history[episode] = total_reward / step_count
+        critic_loss_history[episode] = total_loss / step_count
+        print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode], critic_loss_history[episode])
         # test every 10 episode
         if episode % 10 == 0:
             env = Environment()
