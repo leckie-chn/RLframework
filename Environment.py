@@ -26,10 +26,10 @@ class Environment(object):
         flows = self.flow_in * action + self.buffer
         cur_flow = np.minimum(flows, self.capacity)
         self.buffer = flows - cur_flow
-        drop_flow = np.sum(self.buffer - self.bufsize)
+        drop_flow = np.maximum(np.sum(self.buffer - self.bufsize), np.zeros_like(self.buffer))
         self.buffer = np.minimum(self.buffer, self.bufsize)
         load_factor = cur_flow / self.capacity
-        reward = 2.0 - np.max(load_factor) - math.pow(0 if self.flow_in == 0 else drop_flow / self.flow_in * 100, 3.0)
+        reward = 1.0 - np.max(load_factor) - math.pow(0 if self.flow_in == 0 else drop_flow / self.flow_in * 100, 4.0)
         next_state = self.get_state()
         isTerminal = True if self.t > self.T * 5 * math.pi else False
         return next_state, reward, isTerminal
