@@ -13,7 +13,7 @@ from ReplayBuffer import ReplayBuffer
 
 
 def Play_Game():
-    TAU = 0.001
+    TAU = 0.01
     GAMMA = 0.99
     Buffer_Size = 500
     Batch_Size = 32
@@ -23,7 +23,7 @@ def Play_Game():
     action_size = 3
     episode_count = 10000
     epsilon = 1.0
-    eps_decay = 0.0001
+    eps_decay = 0.000001
 
     np.random.seed(1234)
 
@@ -38,7 +38,7 @@ def Play_Game():
     reward_history = np.empty(episode_count)
     critic_loss_history = np.empty(episode_count)
 
-    for episode in range(episode_count):
+    for episode in xrange(episode_count):
         env = Environment()
         state = env.get_state()
         isTerminal = False
@@ -61,7 +61,7 @@ def Play_Game():
             actions = np.asarray([e[1] for e in batch])
             rewards = np.asarray([e[2] for e in batch])
             new_states = np.asarray([e[3] for e in batch])
-            isTerminals = np.asarray([e[4] for e in batch])
+            isTerminals = np.asarray([1 if e[4] is True else 0 for e in batch])
 
             targetQ = critic.target_model.predict([new_states, actor.target_model.predict(new_states)]).reshape(rewards.shape)
             targetY = rewards + GAMMA * isTerminals * targetQ
@@ -73,6 +73,18 @@ def Play_Game():
             critic.train_target_network()
         reward_history[episode] = total_reward
         critic_loss_history[episode] = total_loss
+        # test every 10 episode
+        if episode % 10 == 0:
+            env = Environment()
+            state = env.get_state()
+            isTerminal = False
+            while isTerminal is False:
+                action = actor.model.predict(state.reshape(1, state_size))[0]
+                next_state, reward, isTerminal = env.take_action(action)
+                print "state ==> {0}, action ==> {1}, reward ==> {2}".format(state, action, reward)
+                state = next_state
+
+
 
     # save model
     actor.model.save_weights('saved_networks/actor_model.h5')
@@ -89,11 +101,11 @@ def Play_Game():
 
     plt.title('Critic Loss')
     plt.plot(np.arange(episode_count), np.log10(critic_loss_history), 'o')
-    plt.xlabel('Batch Iteration')
+    plt.xlabel('Iteration')
     plt.savefig('loss.png')
     plt.close()
 
-    # test model behavior
+
 
 if __name__ == "__main__":
     Play_Game()

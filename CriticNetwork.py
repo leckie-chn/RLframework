@@ -38,7 +38,8 @@ class CriticNetwork(object):
         h1 = merge([state, action], mode='concat')
         h2 = Dense(50, activation='sigmoid')(h1)
         h3 = Dense(50, activation='sigmoid')(h2)
-        Q_value = Dense(1, activation='linear')(h3)
+        h4 = Dense(20, activation='relu')(h3)
+        Q_value = Dense(1, activation='linear')(h4)
         model = Model(input=[state, action], output=Q_value)
         model.compile(loss='mse', optimizer=Adam(lr=self.LEARNING_RATE))
         return model, state, action
