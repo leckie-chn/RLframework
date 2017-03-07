@@ -112,4 +112,4 @@ def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Le
 
 
 if __name__ == "__main__":
-    Play_Game(sys.argv[1])
+    Play_Game(int(sys.argv[1]))
