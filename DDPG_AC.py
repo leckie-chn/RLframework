@@ -38,6 +38,8 @@ def Play_Game():
     reward_history = np.empty(episode_count)
     critic_loss_history = np.empty(episode_count)
 
+    firstQconverge = False
+
     for episode in xrange(episode_count):
         env = Environment()
         state = env.get_state()
@@ -77,6 +79,9 @@ def Play_Game():
             step_count += 1
         reward_history[episode] = total_reward / step_count
         critic_loss_history[episode] = total_loss / step_count
+        if critic_loss_history[episode] < 1e-6 and firstQconverge is False:
+            epsilon = 1.0
+            firstQconverge = True
         print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode],
                                                                            critic_loss_history[episode])
         # test every 10 episode
