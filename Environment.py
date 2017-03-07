@@ -16,7 +16,7 @@ class Environment(object):
         self.buffer = np.zeros_like(self.bufsize)
         self.totcap = np.sum(self.capacity)
         self.t = 0.0
-        self.T = 40.0
+        self.T = 5.0
         self.flow_in = 0.1
         self.state = None
 
@@ -36,5 +36,5 @@ class Environment(object):
         drop_penalty = 0.0 if self.flow_in == 0 else drop_flow / self.flow_in * 100
         reward = 1.0 - np.max(load_factor) - drop_penalty
         next_state = self.get_state()
-        isTerminal = True if self.t > self.T * 5 * math.pi else False
+        isTerminal = True if self.t > self.T * 40 * math.pi else False
         return next_state, reward, isTerminal
