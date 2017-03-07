@@ -18,7 +18,7 @@ def Play_Game():
     Buffer_Size = 500
     Batch_Size = 32
     Learning_Rate_A = 1e-4
-    Learning_Rate_C = 1e-4 
+    Learning_Rate_C = 1e-4
     state_size = 4
     action_size = 3
     episode_count = 10000
@@ -50,7 +50,7 @@ def Play_Game():
             if epsilon > 0:
                 epsilon -= eps_decay
                 noise = np.random.rand(action_size)
-		noise = noise / np.sum(noise)
+                noise = noise / np.sum(noise)
                 action = (1 - epsilon) * action + epsilon * noise
             next_state, reward, isTerminal = env.take_action(action)
             replay_buffer.add(state, action, reward, next_state, isTerminal)
@@ -65,7 +65,8 @@ def Play_Game():
             new_states = np.asarray([e[3] for e in batch])
             isTerminals = np.asarray([1 if e[4] is True else 0 for e in batch])
 
-            targetQ = critic.target_model.predict([new_states, actor.target_model.predict(new_states)]).reshape(rewards.shape)
+            targetQ = critic.target_model.predict([new_states, actor.target_model.predict(new_states)]).reshape(
+                rewards.shape)
             targetY = rewards + GAMMA * isTerminals * targetQ
             total_loss += critic.model.train_on_batch([states, actions], targetY)
             action_for_grad = actor.model.predict(states)
@@ -76,7 +77,8 @@ def Play_Game():
             step_count += 1
         reward_history[episode] = total_reward / step_count
         critic_loss_history[episode] = total_loss / step_count
-        print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode], critic_loss_history[episode])
+        print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode],
+                                                                           critic_loss_history[episode])
         # test every 10 episode
         if episode % 10 == 0:
             env = Environment()
@@ -106,7 +108,6 @@ def Play_Game():
     plt.xlabel('Iteration')
     plt.savefig('loss.png')
     plt.close()
-
 
 
 if __name__ == "__main__":
