@@ -81,6 +81,7 @@ def Play_Game():
         critic_loss_history[episode] = total_loss / step_count
         if critic_loss_history[episode] < 1e-6 and firstQconverge is False:
             epsilon = 1.0
+            eps_decay = 1e-4
             print "Detect Q Network converge under 1e-6"
             firstQconverge = True
         print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode],
