@@ -18,7 +18,7 @@ def Play_Game():
     Buffer_Size = 500
     Batch_Size = 32
     Learning_Rate_A = 1e-4
-    Learning_Rate_C = 0.0005
+    Learning_Rate_C = 1e-4 
     state_size = 4
     action_size = 3
     episode_count = 10000
@@ -50,6 +50,7 @@ def Play_Game():
             if epsilon > 0:
                 epsilon -= eps_decay
                 noise = np.random.rand(action_size)
+		noise = noise / np.sum(noise)
                 action = (1 - epsilon) * action + epsilon * noise
             next_state, reward, isTerminal = env.take_action(action)
             replay_buffer.add(state, action, reward, next_state, isTerminal)
@@ -86,8 +87,6 @@ def Play_Game():
                 next_state, reward, isTerminal = env.take_action(action)
                 print "state ==> {0}, action ==> {1}, reward ==> {2}".format(state, action, reward)
                 state = next_state
-
-
 
     # save model
     actor.model.save_weights('saved_networks/actor_model.h5')
