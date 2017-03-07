@@ -84,8 +84,8 @@ def Play_Game():
             eps_decay = 1e-4
             print "Detect Q Network converge under 1e-6"
             firstQconverge = True
-        print "average reward ==> {0}, average critic loss ==> {1}".format(reward_history[episode],
-                                                                           critic_loss_history[episode])
+        print "average reward ==> {0}, average critic loss ==> {1}, epsilon ==> {2}".format(reward_history[episode],
+                                                                           critic_loss_history[episode], epsilon)
         # test every 10 episode
         if episode % 10 == 0:
             env = Environment()
