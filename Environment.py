@@ -16,12 +16,12 @@ class Environment(object):
         self.buffer = np.zeros_like(self.bufsize)
         self.totcap = np.sum(self.capacity)
         self.t = 0.0
-        self.T = 10.0
+        self.T = 40.0
         self.flow_in = 0.1
         self.state = None
 
     def get_state(self):
-        self.flow_in = math.sin(self.t / (math.pi * 2 * self.T) + 0.1) * self.totcap * 0.80
+        self.flow_in = (math.sin(self.t / (math.pi * 2 * self.T) + 0.1) + 1.0)* self.totcap * 0.45
         self.t += 1.0
         self.state = np.concatenate(([self.flow_in], self.buffer))
         return self.state
