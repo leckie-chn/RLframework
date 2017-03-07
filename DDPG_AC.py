@@ -8,23 +8,21 @@ from keras import backend as K
 import tensorflow as tf
 from ActorNetwork import ActorNetwork
 from CriticNetwork import CriticNetwork
-from Environment import Environment
+from Environment import Environment, get_state_size, get_action_size
 from ReplayBuffer import ReplayBuffer
 
 
-def Play_Game():
-    TAU = 0.01
-    GAMMA = 0.99
-    Buffer_Size = 500
-    Batch_Size = 32
-    Learning_Rate_A = 1e-4
-    Learning_Rate_C = 1e-4
-    state_size = 4
-    action_size = 3
-    episode_count = 10000
-    epsilon = 1.0
-    eps_decay = 0.000001
+def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Learning_Rate_A=1e-4, Learning_Rate_C=1e-4,
+              episode_count=10000, eps_decay=1e-6):
+    config = locals()
+    with open('logs/run-%d.conf' % serialNo, 'w') as conf:
+        print >> conf, config
 
+    logfl = open('logs/run-%d.log' % serialNo, 'w')
+
+    state_size = get_state_size()
+    action_size = get_action_size()
+    epsilon = 1.0
     np.random.seed(1234)
 
     sess = tf.Session()
@@ -79,13 +77,9 @@ def Play_Game():
             step_count += 1
         reward_history[episode] = total_reward / step_count
         critic_loss_history[episode] = total_loss / step_count
-        if critic_loss_history[episode] < 1e-6 and firstQconverge is False:
-            epsilon = 1.0
-            eps_decay = 1e-4
-            print "Detect Q Network converge under 1e-6"
-            firstQconverge = True
-        print "average reward ==> {0}, average critic loss ==> {1}, epsilon ==> {2}".format(reward_history[episode],
-                                                                           critic_loss_history[episode], epsilon)
+        print >> logfl, "average reward ==> {0}, average critic loss ==> {1}, epsilon ==> {2}".format(reward_history[episode],
+                                                                                            critic_loss_history[
+                                                                                                episode], epsilon)
         # test every 10 episode
         if episode % 10 == 0:
             env = Environment()
@@ -94,28 +88,28 @@ def Play_Game():
             while isTerminal is False:
                 action = actor.model.predict(state.reshape(1, state_size))[0]
                 next_state, reward, isTerminal = env.take_action(action)
-                print "state ==> {0}, action ==> {1}, reward ==> {2}".format(state, action, reward)
+                print >> logfl, "state ==> {0}, action ==> {1}, reward ==> {2}".format(state, action, reward)
                 state = next_state
 
     # save model
     actor.model.save_weights('saved_networks/actor_model.h5')
     critic.model.save_weights('saved_networks/critic_model.h5')
-    print "actor target model weights:", actor.target_model.get_weights()
-    print "critic model weights:", critic.model.get_weights()
+    print >> logfl, "actor target model weights:", actor.target_model.get_weights()
+    print >> logfl, "critic model weights:", critic.model.get_weights()
 
     # print figures
     plt.title('Training Reward')
     plt.plot(np.arange(episode_count), reward_history, 'o')
     plt.xlabel('Iteration')
-    plt.savefig('reward.png')
+    plt.savefig('logs/reward-%d.png' % serialNo)
     plt.close()
 
     plt.title('Critic Loss')
     plt.plot(np.arange(episode_count), np.log10(critic_loss_history), 'o')
     plt.xlabel('Iteration')
-    plt.savefig('loss.png')
+    plt.savefig('logs/loss-%d.png' % serialNo)
     plt.close()
 
 
 if __name__ == "__main__":
-    Play_Game()
+    Play_Game(sys.argv[1])

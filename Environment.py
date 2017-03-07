@@ -3,6 +3,11 @@ import random
 
 import numpy as np
 
+def get_state_size():
+    return 4
+
+def get_action_size():
+    return 3
 
 class Environment(object):
     def __init__(self):
