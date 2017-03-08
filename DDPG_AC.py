@@ -12,8 +12,9 @@ from Environment import Environment, get_state_size, get_action_size
 from ReplayBuffer import ReplayBuffer
 
 
-def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Learning_Rate_A=1e-4, Learning_Rate_C=1e-4,
-              episode_count=10000, eps_decay=1e-6):
+def Play_Game(serialNo, Top_Flow_Rate = 1.0, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Learning_Rate_A=1e-4,
+              Learning_Rate_C=1e-4,
+              episode_count=10000, eps_decay=1e-4):
     config = locals()
     with open('logs/run-%d.conf' % serialNo, 'w') as conf:
         print >> conf, config
@@ -39,7 +40,7 @@ def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Le
     firstQconverge = False
 
     for episode in xrange(episode_count):
-        env = Environment()
+        env = Environment(Top_Flow_Rate)
         state = env.get_state()
         isTerminal = False
         total_reward = 0.0
@@ -47,11 +48,9 @@ def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Le
         step_count = 0
         while isTerminal is False:
             action = actor.model.predict(state.reshape(1, state_size))[0]
-            if epsilon > 0:
-                epsilon -= eps_decay
-                noise = np.random.rand(action_size)
-                noise = noise / np.sum(noise)
-                action = (1 - epsilon) * action + epsilon * noise
+            noise = np.random.rand(action_size)
+            noise = noise / np.sum(noise)
+            action = (1 - epsilon) * action + epsilon * noise
             next_state, reward, isTerminal = env.take_action(action)
             replay_buffer.add(state, action, reward, next_state, isTerminal)
             state = next_state
@@ -75,11 +74,14 @@ def Play_Game(serialNo, TAU=1e-4, GAMMA=0.99, Buffer_Size=500, Batch_Size=32, Le
             actor.train_target_network()
             critic.train_target_network()
             step_count += 1
+        if epsilon > 0.0:
+            epsilon -= eps_decay
         reward_history[episode] = total_reward / step_count
         critic_loss_history[episode] = total_loss / step_count
-        print >> logfl, "average reward ==> {0}, average critic loss ==> {1}, epsilon ==> {2}".format(reward_history[episode],
-                                                                                            critic_loss_history[
-                                                                                                episode], epsilon)
+        print >> logfl, "average reward ==> {0}, average critic loss ==> {1}, epsilon ==> {2}".format(
+            reward_history[episode],
+            critic_loss_history[
+                episode], epsilon)
         # test every 10 episode
         if episode % 10 == 0:
             env = Environment()
