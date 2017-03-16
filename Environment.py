@@ -11,12 +11,12 @@ def get_action_size():
 
 class Environment(object):
     def __init__(self, top_flow_rate = 1.0):
-        self.capacity = np.asarray([20.0, 30.0, 50.0])
+        self.capacity = np.asarray([30.0, 40.0, 30.0])
         self.bufsize = np.asarray([10.0, 15.0, 20.0])
         self.buffer = np.zeros_like(self.bufsize)
         self.topflow = np.sum(self.capacity) * top_flow_rate
         self.t = 0.0
-        self.T = 20.0
+        self.T = 50.0
         self.flow_in = 0.0
         self.state = None
 

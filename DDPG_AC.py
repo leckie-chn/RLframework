@@ -114,4 +114,4 @@ def Play_Game(serialNo, Top_Flow_Rate = 1.0, TAU=1e-4, GAMMA=0.99, Buffer_Size=5
 
 
 if __name__ == "__main__":
-    Play_Game(int(sys.argv[1]))
+    Play_Game(int(sys.argv[1]), Top_Flow_Rate=0.95)
