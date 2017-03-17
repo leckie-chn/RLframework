@@ -7,9 +7,8 @@ from keras.optimizers import Adam
 
 model = Sequential()
 model.add(Dense(32, input_dim=2, activation='relu'))
-model.add(BatchNormalization())
-model.add(Dense(32, activation='sigmoid'))
-model.add(Dense(32, activation='sigmoid'))
+model.add(Dense(32, activation='softplus'))
+model.add(Dense(32, activation='softplus'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(1, activation='linear'))
 
