@@ -6,9 +6,9 @@ from keras.models import Sequential
 from keras.optimizers import Adam
 
 mode = 'test'
-scale = 2.00
+scale = 50.00
 num_data = 10000
-data = np.random.random((num_data, 1)) * scale + 1e-4
+data = np.random.random((num_data, 1)) * scale + 10.0
 model = Sequential()
 model.add(Dense(32, input_dim=1, activation='relu'))
 model.add(Dense(32, activation='relu'))
@@ -17,7 +17,7 @@ model.add(Dense(1, activation='linear'))
 model.compile(optimizer=Adam(lr=0.001), loss='mean_squared_error', metrics=['mean_squared_error'])
 
 if mode == 'training':
-    num_round = 20
+    num_round = 1000
     y = 1.0 / data
     his = model.fit(data, y, nb_epoch=num_round, batch_size=32, verbose=1)
 
