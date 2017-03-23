@@ -9,9 +9,9 @@ mode = 'test'
 scale = 50.00
 base = 10.0
 num_data = 10000
-data = np.random.random((num_data, 1)) * scale + base
+data = np.random.random((num_data, 2)) * scale + base
 model = Sequential()
-model.add(Dense(32, input_dim=1, activation='relu'))
+model.add(Dense(32, input_dim=2, activation='relu'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(32, activation='relu'))
 model.add(Dense(1, activation='linear'))
@@ -19,7 +19,7 @@ model.compile(optimizer=Adam(lr=0.001), loss='mean_squared_error', metrics=['mea
 
 if mode == 'train':
     num_round = 1000
-    y = 1.0 / data
+    y = data[:, 0] * data[:, 1]
     his = model.fit(data, y, nb_epoch=num_round, batch_size=32, verbose=0)
 
     plt.figure()
