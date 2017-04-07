@@ -13,6 +13,5 @@ agent = DPGAgent(max_round=200, n_sample=20, batch_size=10, gamma=0.0)
 agent.train()
 plt.figure()
 plt.plot(agent.loss_history, 'g-')
-plt.show()
-plt.close()
+plt.savefig('loss_history.png')
 
