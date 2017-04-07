@@ -69,7 +69,7 @@ class TimeoutReplayBuffer(ReplayBuffer):
             'rewards': [],
             'next_states': [],
         })
-        if self.pool.count() > self.round_timeout:
+        if len(self.pool) > self.round_timeout:
             self.pool.popleft()
 
 
