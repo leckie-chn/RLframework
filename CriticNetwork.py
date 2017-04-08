@@ -1,5 +1,6 @@
 from keras.models import Model
 from keras.layers import Dense, Input, merge
+from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 
 import tensorflow as tf
@@ -15,6 +16,7 @@ class CriticNetwork:
         self.LEARNING_RATE = LEARNING_RATE
 
         K.set_session(sess)
+        K.set_learning_phase(1)
         self.model, self.state, self.action = self.create_network()
         # self.target_model, self.target_state, self.target_action = self.create_network()
         self.action_grad = tf.gradients(self.model.output, self.action)  # gradients for policy(actor) update
@@ -28,14 +30,14 @@ class CriticNetwork:
 
     def create_network(self):
         state = Input(shape=[self.SD])
-        state_h1 = Dense(128, activation="relu")(state)
-        state_h2 = Dense(64, activation="relu")(state_h1)
+        state_h1 = Dense(128, activation="relu")(BatchNormalization()(state))
+        state_h2 = Dense(64, activation="relu")(BatchNormalization()(state_h1))
         action = Input(shape=[self.AD])
-        action_h1 = Dense(64, activation="relu")(action)
-        action_h2 = Dense(32, activation="relu")(action_h1)
+        action_h1 = Dense(64, activation="relu")(BatchNormalization()(action))
+        action_h2 = Dense(32, activation="relu")(BatchNormalization()(action_h1))
         h3 = merge([state_h2, action_h2], mode='concat')
-        h4 = Dense(32, activation="relu")(h3)
-        Q_value = Dense(1, activation='linear')(h4)
+        h4 = Dense(32, activation="relu")(BatchNormalization()(h3))
+        Q_value = Dense(1, activation='linear')(BatchNormalization()(h4))
         model = Model(input=[state, action], output=Q_value)
         model.compile(loss='mse', optimizer=Adam(lr=self.LEARNING_RATE))
         return model, state, action

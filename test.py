@@ -1,17 +1,24 @@
 
 
 from DPG import DPGAgent
-
-import matplotlib.pyplot as plt
-
+import cProfile
+import pickle
+import sys
 
 # tensorflow
 
-agent = DPGAgent(max_round=200, n_sample=20, batch_size=10, gamma=0.0)
+if len(sys.argv) < 1:
+    print "usage: python test.py [history file] [profile file](optional)"
+
+agent = DPGAgent(max_round=1000, n_sample=50, batch_size=32, gamma=0.5)
 
 # TODO: profiling for A3C algorithm
-agent.train()
-plt.figure()
-plt.plot(agent.loss_history, 'g-')
-plt.savefig('loss_history.png')
+if len(sys.argv) == 2:
+    cProfile.run(agent.train(), sys.argv[2])
+else:
+    agent.train()
+
+fl = open(sys.argv[1])
+pickle.dump(agent.history, fl)
+fl.close()
 

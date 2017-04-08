@@ -20,7 +20,11 @@ class SingleCentral(object):
         self.tm_step = np.random.randint(self.point_count)
 
     def get_state(self):
-        return np.concatenate((np.array([self.flow[self.tm_step]]), self.cur_flow / self.capacity))
+        return None if self.isTerminal is True else \
+            np.concatenate((np.array([self.flow[self.tm_step]]), self.cur_flow / self.capacity))
+
+    def correct_action(self):
+        return self.capacity / np.sum(self.capacity)
 
     def take_action(self, action):
         """

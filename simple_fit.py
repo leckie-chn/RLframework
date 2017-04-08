@@ -19,7 +19,7 @@ model.compile(optimizer=Adam(lr=0.001), loss='mean_squared_error', metrics=['mea
 
 if mode == 'train':
     num_round = 1000
-    y = data[:, 0] * data[:, 1]
+    y = data[:, 0] / data[:, 1]
     his = model.fit(data, y, nb_epoch=num_round, batch_size=32, verbose=0)
 
     plt.figure()

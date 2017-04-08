@@ -29,8 +29,8 @@ class TimeoutReplayBuffer(ReplayBuffer):
         self.action_dim = action_dim
         self.pool = deque()
         self.dcount = 0  # number of data buffered
-        self.sample_weight = 1.0 / np.arange(1, self.round_timeout + 1)
-        self.sample_weight /= np.sum(self.sample_weight)
+        # self.sample_weight = 1.0 / np.arange(1, self.round_timeout + 1)
+        # self.sample_weight /= np.sum(self.sample_weight)
         self.pool.append({
             'states': [],
             'actions': [],
@@ -50,11 +50,13 @@ class TimeoutReplayBuffer(ReplayBuffer):
         action_batch = np.empty((batch_size, self.action_dim))
         reward_batch = np.empty((batch_size))
         next_state_batch = np.empty((batch_size, self.state_dim))
-        sample_num = np.random.multinomial(batch_size, self.sample_weight)
+        sample_weight = 1.0 / np.arange(1, len(self.pool) + 1)
+        sample_weight /= np.sum(sample_weight)
+        sample_num = np.random.multinomial(batch_size, sample_weight)
         item_count = 0
         for round_index, round_batch in enumerate(self.pool):
-            batch_index = random.sample(np.arange(len(round_batch['states'])), sample_num[round_index])
-            for index in batch_index:
+            for i in xrange(sample_num[round_index]):
+                index = random.choice(range(len(round_batch['states'])))
                 state_batch[item_count, :] = round_batch['states'][index]
                 action_batch[item_count, :] = round_batch['actions'][index]
                 reward_batch[item_count] = round_batch['rewards'][index]
@@ -63,14 +65,14 @@ class TimeoutReplayBuffer(ReplayBuffer):
 
     def tick(self):
         """delete out-of-round data & init batch for new round data"""
-        self.pool.append({
+        self.pool.appendleft({
             'states': [],
             'actions': [],
             'rewards': [],
             'next_states': [],
         })
         if len(self.pool) > self.round_timeout:
-            self.pool.popleft()
+            self.pool.pop()
 
 
 class PriorityReplayBuffer(ReplayBuffer):

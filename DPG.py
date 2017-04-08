@@ -24,12 +24,17 @@ class DPGAgent(object):
         self.n_sample = n_sample
         self.n_thread = n_thread
         self.batch_size = batch_size
-        state_dim, action_dim, self.env = CreateEnvironment(envopt)
+        self.envopt = envopt
+        state_dim, action_dim, self.env = CreateEnvironment(self.envopt)
         self.actor = ActorNetwork(tf.Session(), state_dim, action_dim, lr_A)  # type: ActorNetwork
         self.critic = CriticNetwork(tf.Session(), state_dim, action_dim, lr_C)  # type: CriticNetwork
         self.replaybuffer = TimeoutReplayBuffer(r_timeout, state_dim, action_dim)
-        self.loss_history = np.empty((max_round))  # loss history for Q-Network
-        self.reward_hisotry = np.empty((max_round))  # reward for each test
+        self.history = {
+            'loss': np.empty((max_round)),
+            'reward': np.empty((max_round)),
+            'test_action': [],
+            'test_correct': [],
+        }
 
     def _async_explore(self, env, actor, eps, n_step):
         """deprecated"""
@@ -72,6 +77,8 @@ class DPGAgent(object):
 
     def _get_env(self):
         # TODO random sample environment from the Environment Pool
+        if self.env.isTerminal is True:
+            _, _, self.env = CreateEnvironment(self.envopt)
         return self.env
 
     def _put_env(self):
@@ -96,19 +103,23 @@ class DPGAgent(object):
             self.actor.train(state_batch, grad_for_actor)
             if eps >= self.eps_end:
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
-            self.loss_history[roundNo] = np.average(loss)
-            self.reward_hisotry[roundNo] = self.test()
+            self.history['loss'][roundNo] = np.average(loss)
+            self.history['reward'][roundNo] = self.test()
             print "round {}: average loss = {}, average reward = {}".format(roundNo, self.loss_history[roundNo], self.reward_hisotry[roundNo])
             self.replaybuffer.tick()
 
     def test(self):
         _, _, env = CreateEnvironment('single-central')
-        env.point_count = 31
         total_reward = 0.0
+        action_history = []
+        correct_action_history = []
         while env.isTerminal is False:
             state = env.get_state()
             action = self.actor.model.predict(state[np.newaxis, :])[0]
+            action_history.append(action)
+            correct_action_history.append(env.correct_action())
             reward = env.take_action(action)
             total_reward += reward
-
+        self.history['test_action'].append(action_history)
+        self.history['test_correct'].append(correct_action_history)
         return total_reward / env.tm_step

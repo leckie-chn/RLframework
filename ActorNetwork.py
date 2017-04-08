@@ -1,7 +1,8 @@
 
 from keras.models import Model
 from keras.initializations import normal
-from keras.layers import Dense, Input, merge
+from keras.layers import Dense, Input
+from keras.layers.normalization import BatchNormalization
 
 import tensorflow as tf
 from keras import backend as K
@@ -15,6 +16,7 @@ class ActorNetwork(object):
         # self.TAU = TAU
 
         K.set_session(sess)
+        K.set_learning_phase(1)
         self.model, self.weights, self.state = self.create_network()
         self.model._make_predict_function()
         # self.target_model, self.target_weights, self.target_state = self.create_network()
@@ -33,10 +35,10 @@ class ActorNetwork(object):
     def create_network(self):
         print("create_actor_network")
         state = Input(shape=[self.SD])
-        h1 = Dense(128, activation="relu")(state)
-        h2 = Dense(64, activation="relu")(h1)
-        h3 = Dense(32, activation="relu")(h2)
-        action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(h3)
+        h1 = Dense(128, activation="relu")(BatchNormalization()(state))
+        h2 = Dense(64, activation="relu")(BatchNormalization()(h1))
+        h3 = Dense(32, activation="relu")(BatchNormalization()(h2))
+        action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(BatchNormalization()(h3))
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state
 
