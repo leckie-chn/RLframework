@@ -18,7 +18,6 @@ class ActorNetwork(object):
         K.set_session(sess)
         K.set_learning_phase(1)
         self.model, self.weights, self.state = self.create_network()
-        self.model._make_predict_function()
         # self.target_model, self.target_weights, self.target_state = self.create_network()
         self.action_gradient = tf.placeholder(tf.float32, [None, action_dim])
         self.params_grad = tf.gradients(self.model.output, self.weights, -self.action_gradient)
@@ -35,8 +34,8 @@ class ActorNetwork(object):
     def create_network(self):
         print("create_actor_network")
         state = Input(shape=[self.SD])
-        h1 = Dense(128, activation="relu")(BatchNormalization()(state))
-        h2 = Dense(64, activation="relu")(BatchNormalization()(h1))
+        h1 = Dense(128, activation="relu")(state)
+        h2 = Dense(64, activation="relu")(h1)
         h3 = Dense(32, activation="relu")(h2)
         action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(h3)
         model = Model(input=state, output=action)

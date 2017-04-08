@@ -30,8 +30,8 @@ class CriticNetwork:
 
     def create_network(self):
         state = Input(shape=[self.SD])
-        state_h1 = Dense(128, activation="relu")(BatchNormalization()(state))
-        state_h2 = Dense(64, activation="relu")(BatchNormalization()(state_h1))
+        state_h1 = Dense(128, activation="relu")(state)
+        state_h2 = Dense(64, activation="relu")(state_h1)
         action = Input(shape=[self.AD])
         action_h1 = Dense(64, activation="relu")(action)
         action_h2 = Dense(32, activation="relu")(action_h1)
