@@ -61,6 +61,7 @@ class TimeoutReplayBuffer(ReplayBuffer):
                 action_batch[item_count, :] = round_batch['actions'][index]
                 reward_batch[item_count] = round_batch['rewards'][index]
                 next_state_batch[item_count, :] = round_batch['next_states'][index]
+                item_count += 1
         return state_batch, action_batch, reward_batch, next_state_batch
 
     def tick(self):
