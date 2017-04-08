@@ -33,9 +33,8 @@ class ActorNetwork(object):
     def create_network(self):
         print("create_actor_network")
         state = Input(shape=[self.SD])
-        h1 = Dense(128, activation="relu")(state)
-        h2 = Dense(64, activation="relu")(h1)
-        h3 = Dense(32, activation="relu")(h2)
+        h1 = Dense(32, activation="relu")(state)
+        h3 = Dense(16, activation="relu")(h1)
         action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(h3)
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state
