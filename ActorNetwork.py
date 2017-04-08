@@ -37,8 +37,8 @@ class ActorNetwork(object):
         state = Input(shape=[self.SD])
         h1 = Dense(128, activation="relu")(BatchNormalization()(state))
         h2 = Dense(64, activation="relu")(BatchNormalization()(h1))
-        h3 = Dense(32, activation="relu")(BatchNormalization()(h2))
-        action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(BatchNormalization()(h3))
+        h3 = Dense(32, activation="relu")(h2)
+        action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(h3)
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state
 

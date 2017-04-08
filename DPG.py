@@ -1,7 +1,7 @@
 import threading
 import numpy as np
 import tensorflow as tf
-from Queue import Queue
+import keras.backend as K
 
 from ActorNetwork import ActorNetwork
 from CriticNetwork import CriticNetwork
@@ -109,6 +109,7 @@ class DPGAgent(object):
             self.replaybuffer.tick()
 
     def test(self):
+        K.set_learning_phase(0)
         _, _, env = CreateEnvironment('single-central')
         total_reward = 0.0
         action_history = []
@@ -122,4 +123,5 @@ class DPGAgent(object):
             total_reward += reward
         self.history['test_action'].append(action_history)
         self.history['test_correct'].append(correct_action_history)
+        K.set_learning_phase(1)
         return total_reward / env.tm_step
