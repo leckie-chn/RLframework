@@ -105,7 +105,7 @@ class DPGAgent(object):
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
             self.history['loss'][roundNo] = np.average(loss)
             self.history['reward'][roundNo] = self.test()
-            print "round {}: average loss = {}, average reward = {}".format(roundNo, self.loss_history[roundNo], self.reward_hisotry[roundNo])
+            print "round {}: average loss = {}, average reward = {}".format(roundNo, self.history['loss'][roundNo], self.history['reward'][roundNo])
             self.replaybuffer.tick()
 
     def test(self):
