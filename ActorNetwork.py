@@ -16,7 +16,6 @@ class ActorNetwork(object):
         # self.TAU = TAU
 
         K.set_session(sess)
-        K.set_learning_phase(1)
         self.model, self.weights, self.state = self.create_network()
         # self.target_model, self.target_weights, self.target_state = self.create_network()
         self.action_gradient = tf.placeholder(tf.float32, [None, action_dim])
