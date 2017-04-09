@@ -101,9 +101,9 @@ class DPGAgent(object):
                                                                     self.critic, self.gamma))
             grad_for_actor = self.critic.gradients(state_batch, action_batch)
             print "round {}: average norm of grad_for_actor = {}".format(roundNo, np.average(np.sum(np.square(grad_for_actor), axis=1)))
-            old_weight = copy.deepcopy(self.actor.model.weights)
+            old_weight = self.actor.model.get_weights()
             self.actor.train(state_batch, grad_for_actor)
-            weight_delta = np.linalg.norm(old_weight - self.actor.model.weights)
+            weight_delta = np.linalg.norm(old_weight - self.actor.model.get_weights())
             print "round {} actor model delta = {}".format(roundNo, weight_delta)
             if eps >= self.eps_end:
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
