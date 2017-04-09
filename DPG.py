@@ -84,6 +84,16 @@ class DPGAgent(object):
         # TODO
         pass
 
+    def _weight_diff(self, old_weight, new_weight):
+        """
+        :type old_weight: list[np.array]
+        :type new_weight: iist[np.array]
+        :rtype: float
+        """
+        old_flat = np.concatenate(tuple([np.array(w).flatten() for w in old_weight]))
+        new_flat = np.concatenate(tuple([np.array(w).flatten() for w in new_weight]))
+        return np.linalg.norm(old_flat - new_flat)
+
     def train(self):
         """
         the process of running A3C algorithm
@@ -101,9 +111,10 @@ class DPGAgent(object):
                                                                     self.critic, self.gamma))
             grad_for_actor = self.critic.gradients(state_batch, action_batch)
             print "round {}: average norm of grad_for_actor = {}".format(roundNo, np.average(np.sum(np.square(grad_for_actor), axis=1)))
-            old_weight = self.actor.model.get_weights()
+            old_weight = copy.deepcopy(self.actor.model.get_weights())
             self.actor.train(state_batch, grad_for_actor)
-            weight_delta = np.linalg.norm(old_weight - self.actor.model.get_weights())
+            new_weight = self.actor.model.get_weights()
+            weight_delta = self._weight_diff(old_weight, new_weight)
             print "round {} actor model delta = {}".format(roundNo, weight_delta)
             if eps >= self.eps_end:
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
