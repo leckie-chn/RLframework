@@ -12,9 +12,9 @@ from ReplayBuffer import TimeoutReplayBuffer
 class DPGAgent(object):
     """Agent for Deterministic Policy Gradient Algorithm"""
 
-    def __init__(self, envopt = 'single-central', max_round = 1000, gamma = 0.99, lr_A = 1e-3, lr_C = 1e-2,
-                 eps_start = 1.00, eps_end = 0.1, eps_rounds = 1000, n_step = 1, n_sample = 50, n_thread = None,
-                 r_timeout = 5, batch_size = 32):
+    def __init__(self, envopt='single-central', max_round=1000, gamma=0.99, lr_A=1e-3, lr_C=1e-2,
+                 eps_start=1.00, eps_end=0.1, eps_rounds=1000, n_step=1, n_sample=50, n_thread=None,
+                 r_timeout=5, batch_size=32):
         self.max_round = max_round
         self.gamma = gamma
         self.eps_start = eps_start
@@ -32,8 +32,7 @@ class DPGAgent(object):
         self.history = {
             'loss': np.empty((max_round)),
             'reward': np.empty((max_round)),
-            'test_action': [],
-            'test_correct': [],
+            'action_error': np.empty((max_round)),
         }
 
     def _async_explore(self, env, actor, eps, n_step):
@@ -57,7 +56,6 @@ class DPGAgent(object):
         reward = env.take_action(action)
         next_state = env.get_state()
         return state, action, reward, next_state
-
 
     def _bootstrap(self, states, rewards, actor, critic, gamma):
         """
@@ -98,18 +96,26 @@ class DPGAgent(object):
             # perform gradient descent on Actor & Critic
             state_batch, action_batch, reward_batch, next_state_batch = self.replaybuffer.get_batch(self.batch_size)
             loss = self.critic.model.train_on_batch([state_batch, action_batch],
-                                                    self._bootstrap(next_state_batch, reward_batch, self.actor, self.critic, self.gamma))
+                                                    self._bootstrap(next_state_batch, reward_batch, self.actor,
+                                                                    self.critic, self.gamma))
             grad_for_actor = self.critic.gradients(state_batch, action_batch)
             self.actor.train(state_batch, grad_for_actor)
             if eps >= self.eps_end:
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
             self.history['loss'][roundNo] = np.average(loss)
-            self.history['reward'][roundNo] = self.test()
-            print "round {}: average loss = {}, average reward = {}".format(roundNo, self.history['loss'][roundNo], self.history['reward'][roundNo])
+            self.history['reward'][roundNo], self.history['action_error'][roundNo] = self.test()
+            print "round {}: average loss = {}, average reward = {}, abs action error = {}".format(roundNo,
+                                                                                                   self.history['loss'][
+                                                                                                       roundNo],
+                                                                                                   self.history[
+                                                                                                       'reward'][
+                                                                                                       roundNo],
+                                                                                                   self.history[
+                                                                                                       'action_error'][
+                                                                                                       roundNo])
             self.replaybuffer.tick()
 
     def test(self):
-        K.set_learning_phase(0)
         _, _, env = CreateEnvironment('single-central')
         total_reward = 0.0
         action_history = []
@@ -121,7 +127,8 @@ class DPGAgent(object):
             correct_action_history.append(env.correct_action())
             reward = env.take_action(action)
             total_reward += reward
-        self.history['test_action'].append(action_history)
-        self.history['test_correct'].append(correct_action_history)
-        K.set_learning_phase(1)
-        return total_reward / env.tm_step
+        # self.history['test_action'].append(action_history)
+        # self.history['test_correct'].append(correct_action_history)
+        avg_reward = total_reward / env.tm_step
+        avg_error = np.average(np.abs(np.array(action_history) - np.array(correct_action_history)))
+        return avg_reward, avg_error
