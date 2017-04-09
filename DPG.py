@@ -99,6 +99,7 @@ class DPGAgent(object):
                                                     self._bootstrap(next_state_batch, reward_batch, self.actor,
                                                                     self.critic, self.gamma))
             grad_for_actor = self.critic.gradients(state_batch, action_batch)
+            print "round {}: average norm of grad_for_actor = {}".format(roundNo, np.average(np.sum(np.square(grad_for_actor), axis=1)))
             self.actor.train(state_batch, grad_for_actor)
             if eps >= self.eps_end:
                 eps -= (self.eps_start - self.eps_end) / self.eps_rounds
