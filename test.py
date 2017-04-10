@@ -1,24 +1,35 @@
 
 
 from DPG import DPGAgent
-import cProfile
+from ActorNetwork import ActorNetwork
+from CriticNetwork import CriticNetwork
+from Environment import CreateEnvironment
+
 import pickle
-import sys
+import cProfile
+import tensorflow as tf
 
-# tensorflow
 
-if len(sys.argv) < 2:
-    print "usage: python test.py [history file] [profile file](optional)"
+env_setting = 'single-central'
+state_dim, action_dim, _ = CreateEnvironment(env_setting)
 
-agent = DPGAgent(max_round=1000, n_sample=50, batch_size=32, gamma=0.0)
+sess = tf.Session()
+actor = ActorNetwork(sess, state_dim, action_dim, 1e-3)
+critic = CriticNetwork(sess, state_dim, action_dim, 1e-4)
+agent = DPGAgent(actor_=actor, critic_=critic, max_round=10, n_sample=10, batch_size=32, gamma=0.0)
 
-# TODO: profiling for A3C algorithm
-if len(sys.argv) == 2:
-    cProfile.run(agent.train(), sys.argv[2])
+
+
+profile_path = None
+if profile_path is not None:
+    cProfile.run(agent.train(), profile_path)
 else:
     agent.train()
 
-fl = open(sys.argv[1], 'w')
+actor.model.save('saved_networks/actor.h5')
+critic.model.save('saved_networks/critic.h5')
+
+fl = open('history.json', 'w')
 pickle.dump(agent.history, fl)
 fl.close()
 

@@ -8,6 +8,8 @@ import tensorflow as tf
 from keras import backend as K
 
 
+# TODO polymorphism on Network Architecture
+
 class ActorNetwork(object):
     def __init__(self, sess, state_dim, action_dim, LEARNING_RATE):
         self.sess = sess
@@ -45,3 +47,11 @@ class ActorNetwork(object):
     #     for i in xrange(len(critic_weights)):
     #         critic_target_weights[i] = self.TAU * critic_weights[i] + (1 - self.TAU) * critic_target_weights[i]
     #     self.target_model.set_weights(critic_target_weights)
+
+class ActorNewtorkV1(ActorNetwork):
+    def __init__(self, sess, state_dim, action_dim, LEARNING_RATE):
+        super(ActorNewtorkV1, self).__init__(sess, state_dim, action_dim, LEARNING_RATE)
+
+    def create_network(self):
+        # state = Input(shape=[self.SD])
+        pass
