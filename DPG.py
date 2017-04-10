@@ -27,8 +27,9 @@ class DPGAgent(object):
         self.batch_size = batch_size
         self.envopt = envopt
         state_dim, action_dim, self.env = CreateEnvironment(self.envopt)
-        self.actor = ActorNetwork(tf.Session(), state_dim, action_dim, lr_A)  # type: ActorNetwork
-        self.critic = CriticNetwork(tf.Session(), state_dim, action_dim, lr_C)  # type: CriticNetwork
+        session = tf.Session()
+        self.actor = ActorNetwork(session, state_dim, action_dim, lr_A)  # type: ActorNetwork
+        self.critic = CriticNetwork(session, state_dim, action_dim, lr_C)  # type: CriticNetwork
         self.replaybuffer = TimeoutReplayBuffer(r_timeout, state_dim, action_dim)
         self.history = {
             'loss': np.empty((max_round)),
