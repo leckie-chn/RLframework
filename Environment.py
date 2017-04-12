@@ -1,40 +1,90 @@
-import math
-import random
 
 import numpy as np
+import math
 
-def get_state_size():
-    return 4
+def CreateEnvironment(opt):
+    if opt == 'single-central':
+        return 4, 3, SingleCentral()
+    elif opt == 'double-central':
+        return 9, 4, DoubleCentral()
+    else:
+        return None
 
-def get_action_size():
-    return 3
-
-class Environment(object):
-    def __init__(self, top_flow_rate = 1.0):
-        self.capacity = np.asarray([30.0, 40.0, 30.0])
-        self.bufsize = np.asarray([10.0, 15.0, 20.0])
-        self.buffer = np.zeros_like(self.bufsize)
-        self.topflow = np.sum(self.capacity) * top_flow_rate
-        self.t = 0.0
-        self.T = 50.0
-        self.flow_in = 0.0
-        self.state = None
+class SingleCentral(object):
+    def __init__(self, tm_count = 628):
+        self.capacity = [20.0, 30.0, 50.0]
+        self.point_count = tm_count
+        self.flow = 30 + np.sin(np.linspace(0, 2*math.pi, num=self.point_count)) * 10
+        self.cur_flow = np.zeros_like(self.capacity)
+        self.isTerminal = False
+        self.tm_step = np.random.randint(self.point_count)
 
     def get_state(self):
-        self.flow_in = (math.sin(math.pi * 2.0 * self.t / self.T + 0.1) + 1.0)* self.topflow * 0.5
-        self.t += 1.0
-        self.state = np.concatenate(([self.flow_in], self.buffer))
-        return self.state
+        return None if self.isTerminal is True else \
+            np.concatenate((np.array([self.flow[self.tm_step]]), self.cur_flow / self.capacity))
+
+    def correct_action(self):
+        return self.capacity / np.sum(self.capacity)
 
     def take_action(self, action):
-        flows = self.flow_in * action + self.buffer
-        cur_flow = np.minimum(flows, self.capacity)
-        self.buffer = flows - cur_flow
-        drop_flow = np.sum(np.maximum(self.buffer - self.bufsize, np.zeros_like(self.buffer)))
-        self.buffer = np.minimum(self.buffer, self.bufsize)
-        load_factor = cur_flow / self.capacity
-        drop_penalty = 0.0 if self.flow_in == 0 else drop_flow / self.flow_in * 100
-        reward = 1.0 - np.max(load_factor) - drop_penalty
-        next_state = self.get_state()
-        isTerminal = True if self.t > self.T * 2.0 else False
-        return next_state, reward, isTerminal
+        """
+        :type action: np.ndarray
+        :return:
+        """
+        # if action.shape != (3):
+        #    raise ValueError("action should be numpy array of shape (3), not {}".format(action.shape))
+        new_flow = action * self.flow[self.tm_step]
+        self.cur_flow += new_flow
+        usage_rate = self.cur_flow / self.capacity
+        self.cur_flow = np.maximum(np.zeros_like(self.capacity), self.cur_flow - self.capacity)
+        self.tm_step += 1
+        self.isTerminal = self.tm_step >= self.point_count
+        reward = 1 - np.max(usage_rate)
+        return reward
+
+
+class DoubleCentral(object):
+    def __init__(self):
+        self.capacity = np.array([100.0, 200.0, 200.0, 100.0, 200.0, 200.0, 200.0])
+        self.cur_flow = np.zeros_like(self.capacity)
+        self.usgrate = np.zeros_like(self.capacity)
+        self.point_count = 628
+        self.flow_a = 120 + np.sin( np.linspace(0, 2*math.pi, num=self.point_count) )*20
+        self.flow_b = 70 + np.cos( np.linspace(0, 2*math.pi, num=self.point_count) )*10
+        self.max_step_count = 20
+        self.tm_step = np.random.randint(self.point_count)
+        self.isTerminal = False
+
+    def get_state(self):
+        # np.random.seed(0)
+        # self.data_step_count = 0
+        return np.concatenate((np.array([self.flow_a[self.tm_step], self.flow_b[self.tm_step]]),self.usgrate))
+
+    def take_action(self, action):
+        print "cur_state ==>", list(self.cur_state)
+        print "action ==>", action
+        action = np.array(action)
+        # self.data_step_count += 1
+
+        new_flow = np.array([
+            self.flow_a[self.tm_step] * action[0],
+            self.flow_b[self.tm_step] * action[2],
+            self.flow_a[self.tm_step] * action[1],
+            0.0,
+            self.flow_b[self.tm_step] * action[3],
+            0.0,
+            0.0
+        ])
+
+        new_flow[3] = new_flow[0] + new_flow[1]
+        new_flow[5] = new_flow[1]
+        new_flow[6] = new_flow[0]
+
+
+        self.cur_flow += new_flow
+        self.usgrate = self.cur_flow / self.capacity
+        self.cur_flow = np.maximum(np.zeros_like(self.cur_flow), self.cur_flow - self.capacity)
+        reward = 1.0 - np.max(self.usgrate) - np.sum(self.cur_flow / self.capacity)
+        self.isTerminal = self.tm_step >= self.point_count # TODO terminate when too much overflow
+        self.tm_step += 1
+        return reward, self.get_state()
