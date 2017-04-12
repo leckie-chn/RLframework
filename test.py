@@ -15,8 +15,11 @@ state_dim, action_dim, _ = CreateEnvironment(env_setting)
 
 sess = tf.Session()
 actor = ActorNetwork(sess, state_dim, action_dim, 1e-3)
-critic = CriticNetwork(sess, state_dim, action_dim, 1e-4)
-agent = DPGAgent(actor_=actor, critic_=critic, max_round=10, n_sample=10, batch_size=32, gamma=0.0)
+critic = CriticNetwork(sess, state_dim, action_dim, 0.005)
+#actor.model.load_weights('saved_networks/actor_weight.h5')
+#critic.model.load_weights('saved_networks/critic_weight.h5')
+agent = DPGAgent(actor_=actor, critic_=critic, max_round=2000, n_sample=256, batch_size=512,
+                 gamma=0.9, eps_end=0.01, eps_rounds=990)
 
 
 
@@ -26,10 +29,10 @@ if profile_path is not None:
 else:
     agent.train()
 
-actor.model.save('saved_networks/actor.h5')
-critic.model.save('saved_networks/critic.h5')
+actor.model.save_weights('saved_networks/actor_weight.h5')
+critic.model.save_weights('saved_networks/critic_weight.h5')
 
-fl = open('history.json', 'w')
+fl = open('history.pkl', 'w')
 pickle.dump(agent.history, fl)
 fl.close()
 
