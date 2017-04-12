@@ -18,10 +18,11 @@ class SingleCentral(object):
         self.cur_flow = np.zeros_like(self.capacity)
         self.isTerminal = False
         self.tm_step = np.random.randint(self.point_count)
+        self.flow_in = max(self.flow[self.tm_step] + np.random.normal(0.0, 5.0), 0.0)
 
     def get_state(self):
         return None if self.isTerminal is True else \
-            np.concatenate((np.array([self.flow[self.tm_step]]), self.cur_flow / self.capacity))
+            np.concatenate((np.array([self.flow_in]), self.cur_flow / self.capacity))
 
     def correct_action(self):
         return self.capacity / np.sum(self.capacity)
@@ -33,11 +34,12 @@ class SingleCentral(object):
         """
         # if action.shape != (3):
         #    raise ValueError("action should be numpy array of shape (3), not {}".format(action.shape))
-        new_flow = action * self.flow[self.tm_step]
+        new_flow = action * self.flow_in
         self.cur_flow += new_flow
         usage_rate = self.cur_flow / self.capacity
         self.cur_flow = np.maximum(np.zeros_like(self.capacity), self.cur_flow - self.capacity)
         self.tm_step += 1
+        self.flow_in = max(self.flow[self.tm_step] + np.random.normal(0.0, 5.0), 0.0)
         self.isTerminal = self.tm_step >= self.point_count
         reward = 1 - np.max(usage_rate)
         return reward
@@ -50,7 +52,7 @@ class DoubleCentral(object):
         self.usgrate = np.zeros_like(self.capacity)
         self.point_count = 628
         self.flow_a = 120 + np.sin( np.linspace(0, 2*math.pi, num=self.point_count) )*20
-        self.flow_b = 70 + np.cos( np.linspace(0, 2*math.pi, num=self.point_count) )*10
+        self.flow_b = 70 + np.cos( np.linspace(0, 5*math.pi, num=self.point_count) + 1.0)*10
         self.max_step_count = 20
         self.tm_step = np.random.randint(self.point_count)
         self.isTerminal = False
