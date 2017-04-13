@@ -1,9 +1,7 @@
-
-
 from DPG import DPGAgent
 from ActorNetwork import ActorNetwork
 from CriticNetwork import CriticNetwork
-from Environment import CreateEnvironment
+from Environment import CreateEnvironment, SetEnvironment
 
 import pickle
 import cProfile
@@ -11,15 +9,16 @@ import tensorflow as tf
 
 
 env_setting = 'single-central'
-state_dim, action_dim, _ = CreateEnvironment(env_setting)
+SetEnvironment(env_setting, [20, 30, 50], 628)
+state_dim, action_dim, _ = CreateEnvironment()
 
 sess = tf.Session()
 actor = ActorNetwork(sess, state_dim, action_dim, 1e-3)
-critic = CriticNetwork(sess, state_dim, action_dim, 0.005)
+critic = CriticNetwork(sess, state_dim, action_dim, 1e-4)
 #actor.model.load_weights('saved_networks/actor_weight.h5')
 #critic.model.load_weights('saved_networks/critic_weight.h5')
-agent = DPGAgent(actor_=actor, critic_=critic, max_round=2000, n_sample=256, batch_size=512,
-                 gamma=0.9, eps_end=0.01, eps_rounds=990)
+agent = DPGAgent(actor_=actor, critic_=critic, max_round=4000, n_sample=256, batch_size=512,
+                 gamma=0.0, eps_end=0.01, eps_rounds=1980)
 
 
 
