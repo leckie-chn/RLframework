@@ -30,15 +30,16 @@ class CriticNetwork:
 
     def create_network(self):
         state = Input(shape=[self.SD])
-        state_h1 = Dense(32, activation="relu")(state)
-        state_h2 = Dense(32, activation="relu")(state_h1)
+        state_h1 = Dense(64, activation="relu")(state)
+        state_h2 = Dense(64, activation="relu")(state_h1)
         action = Input(shape=[self.AD])
-        action_h1 = Dense(32, activation="relu")(action)
+        action_h1 = Dense(64, activation="relu")(action)
         action_h2 = Dense(32, activation="relu")(action_h1)
         h3 = merge([state_h2, action_h2], mode='concat')
-        h4 = Dense(16, activation="relu")(h3)
-        h5 = Dense(16, activation="relu")(h4)
-        Q_value = Dense(1, activation='linear')(h5)
+        h4 = Dense(32, activation="relu")(h3)
+        h5 = Dense(32, activation="relu")(h4)
+        h6 = Dense(32, activation="relu")(h5)
+        Q_value = Dense(1, activation='linear')(h6)
         model = Model(input=[state, action], output=Q_value)
         model.compile(loss='mse', optimizer=Adam(lr=self.LEARNING_RATE))
         return model, state, action
