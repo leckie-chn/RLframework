@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Dense, Input, merge
+from keras.layers import Dense, Input, concatenate
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 

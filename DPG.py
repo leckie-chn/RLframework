@@ -10,7 +10,7 @@ from ReplayBuffer import TimeoutReplayBuffer
 class DPGAgent(object):
     """Agent for Deterministic Policy Gradient Algorithm"""
 
-    def __init__(self, actor_, critic_, envopt='single-central', max_round=1000, gamma=0.99,
+    def __init__(self, actor_, critic_, max_round=1000, gamma=0.99,
                  eps_start=1.00, eps_end=0.1, eps_rounds=1000, n_step=1, n_sample=50, n_thread=None,
                  r_timeout=5, batch_size=32, test_round=None):
         self.max_round = max_round
@@ -24,8 +24,7 @@ class DPGAgent(object):
         self.batch_size = batch_size
         self.test_round = int(test_round) if test_round is not None else None
 
-        self.envopt = envopt
-        state_dim, action_dim, self.env = CreateEnvironment(self.envopt)
+        state_dim, action_dim, self.env = CreateEnvironment()
         self.actor = actor_  # type: ActorNetwork
         self.critic = critic_  # type: CriticNetwork
         self.replaybuffer = TimeoutReplayBuffer(r_timeout, state_dim, action_dim)
@@ -76,7 +75,7 @@ class DPGAgent(object):
     def _get_env(self):
         # TODO random sample environment from the Environment Pool
         if self.env.isTerminal is True:
-            _, _, self.env = CreateEnvironment(self.envopt)
+            _, _, self.env = CreateEnvironment()
         return self.env
 
     def _put_env(self):
@@ -129,7 +128,7 @@ class DPGAgent(object):
                 print "round {} actor model delta = {}".format(roundNo, weight_delta)
 
     def test(self, save_plot=False):
-        _, _, env = CreateEnvironment('single-central')
+        _, _, env = CreateEnvironment()
         action_history = []
         correct_action_history = []
         while env.isTerminal is False:

@@ -1,6 +1,6 @@
 
 from keras.models import Model
-from keras.initializations import normal
+from keras.initializers import RandomNormal
 from keras.layers import Dense, Input
 from keras.layers.normalization import BatchNormalization
 
