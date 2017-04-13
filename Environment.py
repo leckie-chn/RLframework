@@ -50,6 +50,7 @@ class Environment(object):
     def take_action(self, action):
         self.take_flow(action)
         usage_rate = self.cur_flow / self.capacity
+        self.cur_flow = np.maximum(np.zeros_like(self.cur_flow), self.cur_flow - self.capacity)
         self.tm_step += 1
         if self.tm_step < self.tot_stamp:
             self.flow_in = np.maximum(self.flows[self.tm_step, :] + np.random.normal(0.0, 5.0, (self.flow_dim)),
