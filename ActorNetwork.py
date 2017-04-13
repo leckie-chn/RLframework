@@ -1,6 +1,6 @@
 
 from keras.models import Model
-from keras.initializations import normal
+from keras.initializers import RandomNormal
 from keras.layers import Dense, Input
 from keras.layers.normalization import BatchNormalization
 
@@ -37,7 +37,7 @@ class ActorNetwork(object):
         state = Input(shape=[self.SD])
         h1 = Dense(32, activation="relu")(state)
         h3 = Dense(16, activation="relu")(h1)
-        action = Dense(self.AD, activation='softmax', init=lambda shape, name: normal(shape, scale=1e-2, name=name))(h3)
+        action = Dense(self.AD, activation='softmax', kernel_initializer=RandomNormal(stddev=1e-2))(h3)
         model = Model(input=state, output=action)
         return model, model.trainable_weights, state
 

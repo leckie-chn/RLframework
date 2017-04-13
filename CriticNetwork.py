@@ -1,5 +1,5 @@
 from keras.models import Model
-from keras.layers import Dense, Input, merge
+from keras.layers import Dense, Input, concatenate
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 
@@ -35,7 +35,7 @@ class CriticNetwork:
         action = Input(shape=[self.AD])
         action_h1 = Dense(32, activation="relu")(action)
         action_h2 = Dense(32, activation="relu")(action_h1)
-        h3 = merge([state_h2, action_h2], mode='concat')
+        h3 = concatenate([state_h2, action_h2])
         h4 = Dense(16, activation="relu")(h3)
         h5 = Dense(16, activation="relu")(h4)
         Q_value = Dense(1, activation='linear')(h5)
