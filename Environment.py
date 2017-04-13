@@ -92,7 +92,7 @@ class DoubleCentral(Environment):
         ]))
 
     def correct_action(self):
-        return
+        pass
 
     def take_flow(self, action):
         new_flow = np.array([
