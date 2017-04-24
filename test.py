@@ -1,5 +1,3 @@
-import pickle
-
 import tensorflow as tf
 
 from DPG import DPGAgent
@@ -31,8 +29,4 @@ agent.train()
 
 #actor.model.save_weights('saved_networks/actor_weight.h5')
 #critic.model.save_weights('saved_networks/critic_weight.h5')
-
-fl = open('history.pkl', 'w')
-pickle.dump(agent.history, fl)
-fl.close()
 
