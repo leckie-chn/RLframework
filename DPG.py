@@ -26,11 +26,11 @@ class DPGAgent(object):
         state_dim, action_dim, self.env = CreateEnvironment()
         self.model = model_ # type: DPGModel
         self.replaybuffer = TimeoutReplayBuffer(r_timeout, state_dim, action_dim)
-        self.history = {
-            'loss': np.empty((max_round)),
-            'action_error': np.empty((max_round)),
-            'test_data': []
-        }
+        # self.history = {
+        #     'loss': np.empty((max_round)),
+        #     'action_error': np.empty((max_round)),
+        #     'test_data': []
+        # }
         self.summary_writer = tf.summary.FileWriter(logdir=log_dir)
 
     def _async_explore(self, env, model, eps, n_step):
